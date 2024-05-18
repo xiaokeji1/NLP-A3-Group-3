@@ -20,29 +20,29 @@ class TextDataset(Dataset):
         text = self.datas[idx]
         encoding = self.tokenizer.encode_plus(
             text,
-            add_special_tokens=True,  # 添加特殊的'[CLS]'和'[SEP]'
-            max_length=512,  # 设置最大序列长度
-            padding='max_length',  # 进行填充
-            return_attention_mask=True,  # 返回注意力掩码
-            return_tensors='pt',  # 返回PyTorch张量
-            truncation=True  # 进行截断
+            add_special_tokens=True, # Add special '[CLS]' and '[SEP]'
+            max_length=512, # Set the maximum sequence length
+            padding='max_length', # Fill
+            return_attention_mask=True,  # Return the attention mask
+            return_tensors='pt',  # Return a PyTorch tensor
+            truncation=True  # Truncate
         )
         labels = self.labels[idx]
         return {
-            'input_ids': encoding['input_ids'].flatten(),            # 输入id
-            'attention_mask': encoding['attention_mask'].flatten(),  # 注意力掩码
+            'input_ids': encoding['input_ids'].flatten(),           # Input id
+            'attention_mask': encoding['attention_mask'].flatten(),  # Attention Mask
             'labels': torch.tensor(labels, dtype=torch.long)
         }
 
 
-# 训练数据集
+# Training dataset
 train_data = np.load('/root/sentiment_analysisB/process_data/train_text.npy')
 train_label = np.load('/root/sentiment_analysisB/process_data/train_label.npy')
 print(train_data.shape, train_label.shape)
 dataset = TextDataset(train_data, train_label)
 dataloader = DataLoader(dataset, batch_size = 16, shuffle = True)
 
-# 测试数据集
+# Test dataset
 val_data = np.load('/root/sentiment_analysisB/process_data/val_text.npy')
 val_label = np.load('/root/sentiment_analysisB/process_data/val_label.npy')
 print(val_data[0], val_label[0])
@@ -51,17 +51,17 @@ val_dataset = TextDataset(val_data, val_label)
 val_dataloader = DataLoader(val_dataset, batch_size = 16, shuffle = False)
 
 
-# 初始化 Transformer 模型
+# Initialize the Transformer model
 model = SAModel()
 
-# 定义损失函数和优化器
+# Define loss function and optimizer
 criterion = nn.CrossEntropyLoss()
 # decayRate = 0.96
 # my_lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer=my_optim, gamma=decayRate)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
 
-# 训练模型
+# Train the model
 model.train()
 if torch.cuda.is_available():  
     model.cuda()
@@ -79,7 +79,7 @@ def eval_model(test_size):
         _, predicted = torch.max(logits, 1)
         correct = (predicted == labels).float()  
             
-        # 计算准确率（正确的预测数 / 总样本数）  
+       # Calculate accuracy (number of correct predictions / total number of samples)
         acc = correct.sum() / len(labels)
         print(f"ACC: {acc}")
         
@@ -112,9 +112,9 @@ for epoch in range(100000000000000000000):
             torch.save(model.state_dict(), 'model_weights_test.pth')
             eval_model(test_size = 64)
             losses.append(loss.item())  
-            # 在训练结束后绘制损失曲线图  
+            # Draw the loss curve after training 
             plt.plot(losses)  
-            plt.xlabel('Epoch')  # 如果你想按epoch显示，可以修改为'Epoch'并使用epoch // len(dataloader)作为x轴值  
+            plt.xlabel('Epoch')  # If you want to display by epoch, you can change it to 'Epoch' and use epoch // len(dataloader) as the x-axis value  
             plt.ylabel('Loss')  
             plt.title('Loss Curve')  
       
