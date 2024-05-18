@@ -70,9 +70,9 @@ class SAModel(nn.Module):
         Returns:
             - x (:obj:`torch.Tensor`): The output tensor from the Transformer.
         """
-        # 获取BERT模型的输出
+        # Get the output of the BERT model
         llm_output = self.bert_model(x, mask)
-        # 输出将包含两个主要部分：'last_hidden_state' 和 'pooler_output'
+        # The output will contain two main parts:'last_hidden_state' 和 'pooler_output'
         last_hidden_states = llm_output.last_hidden_state
         pooler_output = llm_output.pooler_output
         # print("examine output:", pooler_output.shape, type(pooler_output), pooler_output.device)
